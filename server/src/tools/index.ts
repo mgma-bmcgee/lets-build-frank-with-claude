@@ -3,8 +3,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool, type Tool, type ToolContext } from './define.js';
 import { getStatus } from './get_status.js';
+import { listResources } from './list_resources.js';
 
-export const tools: Tool[] = [getStatus];
+export const tools: Tool[] = [getStatus, listResources];
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   for (const tool of tools) registerTool(server, tool, ctx);
