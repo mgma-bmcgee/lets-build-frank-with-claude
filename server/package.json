@@ -15,6 +15,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@azure/arm-appcontainers": "4.0.0",
+    "@azure/arm-resources": "8.0.0",
+    "@azure/core-rest-pipeline": "1.25.0",
+    "@azure/identity": "4.13.3",
     "@modelcontextprotocol/sdk": "1.30.1",
     "express": "5.2.1",
     "zod": "4.6.5"

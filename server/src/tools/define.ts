@@ -7,6 +7,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import type { AzureGateway } from '../azure.js';
 import type { Config } from '../config.js';
 
 export const TOOL_VERBS = ['get', 'list', 'search', 'summarize'] as const;
@@ -23,6 +24,8 @@ type Output = z.ZodObject<{ summary: z.ZodString } & z.ZodRawShape>;
 export interface ToolContext {
   config: Config;
   startedAt: Date;
+  /** Frank's read-only view of Azure; null when the Azure variables are not all set. */
+  azure: AzureGateway | null;
 }
 
 export interface Tool<I extends StrictInput = StrictInput, O extends Output = Output> {
@@ -58,6 +61,15 @@ export function defineTool<I extends StrictInput, O extends Output>(tool: Tool<I
 
 export function isStrict(schema: z.ZodObject): boolean {
   return schema._zod.def.catchall?._zod.def.type === 'never';
+}
+
+/** The gateway, or a plain-language failure naming what is missing (ADR-009: fail closed). */
+export function requireAzure(ctx: ToolContext): AzureGateway {
+  if (!ctx.azure) {
+    const missing = ctx.config.missingAzureVars.join(', ') || 'the Azure settings';
+    throw new ToolError(`Azure is not configured, so Frank can't read it: missing ${missing}.`);
+  }
+  return ctx.azure;
 }
 
 export function toolError(message: string): CallToolResult {
