@@ -67,6 +67,19 @@ describe('loadConfig', () => {
     expect(config.allowedHosts).toEqual([...LOOPBACK_HOSTS, 'frank-octocat.happy-hill-123.eastus.azurecontainerapps.io']);
   });
 
+  it("also allows this revision's own hostname", () => {
+    const config = loadConfig({
+      CONTAINER_APP_NAME: 'frank-octocat',
+      CONTAINER_APP_ENV_DNS_SUFFIX: 'happy-hill-123.eastus.azurecontainerapps.io',
+      CONTAINER_APP_HOSTNAME: 'frank-octocat--1xqmu0c.happy-hill-123.eastus.azurecontainerapps.io',
+    });
+    expect(config.allowedHosts).toEqual([
+      ...LOOPBACK_HOSTS,
+      'frank-octocat.happy-hill-123.eastus.azurecontainerapps.io',
+      'frank-octocat--1xqmu0c.happy-hill-123.eastus.azurecontainerapps.io',
+    ]);
+  });
+
   it('does not guess an FQDN from half the platform variables', () => {
     expect(loadConfig({ CONTAINER_APP_NAME: 'frank-octocat' }).allowedHosts).toEqual(LOOPBACK_HOSTS);
   });

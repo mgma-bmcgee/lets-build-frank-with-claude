@@ -27,9 +27,11 @@ const envSchema = z.object({
   AZURE_CLIENT_ID: optional,
   AZURE_TENANT_ID: optional,
   AZURE_CLIENT_SECRET: optional,
-  // Injected by Azure Container Apps; together they form the app's FQDN.
+  // Injected by Azure Container Apps: the first two form the app's FQDN; the
+  // third is this revision's own hostname (<app>--<revision>.<suffix>).
   CONTAINER_APP_NAME: optional,
   CONTAINER_APP_ENV_DNS_SUFFIX: optional,
+  CONTAINER_APP_HOSTNAME: optional,
 });
 
 const AZURE_VARS = [
@@ -90,6 +92,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (e.CONTAINER_APP_NAME && e.CONTAINER_APP_ENV_DNS_SUFFIX) {
     allowedHosts.push(`${e.CONTAINER_APP_NAME}.${e.CONTAINER_APP_ENV_DNS_SUFFIX}`.toLowerCase());
   }
+  if (e.CONTAINER_APP_HOSTNAME) allowedHosts.push(e.CONTAINER_APP_HOSTNAME.toLowerCase());
 
   return {
     port: e.PORT,
