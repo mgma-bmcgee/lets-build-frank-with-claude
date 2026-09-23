@@ -59,6 +59,8 @@ export interface Config {
   missingAzureVars: string[];
   /** Hostnames allowed to reach /mcp (DNS-rebinding protection, plan step 6). */
   allowedHosts: string[];
+  /** This app's own name (CONTAINER_APP_NAME), so tools can mark it `isSelf`. Null outside Container Apps. */
+  selfAppName: string | null;
 }
 
 export class ConfigError extends Error {
@@ -101,5 +103,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     azure,
     missingAzureVars,
     allowedHosts,
+    selfAppName: e.CONTAINER_APP_NAME?.toLowerCase() ?? null,
   };
 }

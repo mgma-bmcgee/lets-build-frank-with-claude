@@ -19,7 +19,7 @@ let client: Client;
 
 beforeAll(async () => {
   const server = new McpServer({ name: 'frank-test', version: '0.0.0' });
-  registerTools(server, { config: testConfig(), startedAt: new Date() });
+  registerTools(server, { config: testConfig(), startedAt: new Date(), azure: null });
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   await server.connect(serverSide);
   client = new Client({ name: 'conventions-test', version: '0.0.0' });

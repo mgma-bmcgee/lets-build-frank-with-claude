@@ -11,6 +11,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { hostHeaderValidation } from '@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import express, { type ErrorRequestHandler, type Request, type Response } from 'express';
+import { type AzureGateway, createAzureGateway } from './azure.js';
 import type { Config } from './config.js';
 import { registerTools } from './tools/index.js';
 
@@ -22,7 +23,12 @@ function jsonRpcError(res: Response, status: number, message: string): void {
   res.status(status).json({ jsonrpc: '2.0', error: { code: -32000, message }, id: null });
 }
 
-export function createApp(config: Config, startedAt: Date = new Date()): express.Express {
+export function createApp(
+  config: Config,
+  startedAt: Date = new Date(),
+  // Built once, so the credential's token cache is shared by every request.
+  azure: AzureGateway | null = createAzureGateway(config),
+): express.Express {
   const app = express();
   app.disable('x-powered-by');
 
@@ -31,10 +37,10 @@ export function createApp(config: Config, startedAt: Date = new Date()): express
   });
 
   const mcp = express.Router();
-  // DNS-rebinding protection, guarding /mcp only (plan step 6, option C). It
-  // matters for local dev, where Frank may run with the developer's own Azure
-  // identity; the deployed /mcp is public anyway. Hostname-only, so any port
-  // works. Known limitation: reaching a local Frank by LAN IP or another name
+  // DNS-rebinding protection, guarding /mcp only (plan step 6, option C). It is
+  // defence in depth for a Frank on localhost; the deployed /mcp is public
+  // anyway. (Frank never uses a developer's own Azure login: ADR-009.)
+  // Hostname-only, so any port works. Known limitation: reaching a local Frank by LAN IP or another name
   // loads the console but its tool calls get 403 — that is expected.
   mcp.use(hostHeaderValidation(config.allowedHosts));
   mcp.use(express.json({ limit: '1mb' }));
@@ -44,7 +50,7 @@ export function createApp(config: Config, startedAt: Date = new Date()): express
   // answer any request.
   mcp.post('/', async (req: Request, res: Response) => {
     const server = new McpServer({ name: 'frank', version: config.version });
-    registerTools(server, { config, startedAt });
+    registerTools(server, { config, startedAt, azure });
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
     res.on('close', () => {
       void transport.close();
