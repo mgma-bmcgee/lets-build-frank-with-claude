@@ -42,8 +42,8 @@ classmate's app, the registry and the environment. And `/mcp` is **public**
 - No new credential, identity or pipeline change.
 - **Anyone with Frank's URL sees the class inventory**: app names (GitHub
   usernames), FQDNs, images, variable names. No secrets and no write path.
-  Acceptable for one afternoon; the names are already public via GitHub and
-  Certificate Transparency.
+  Acceptable for one afternoon; the names are already public in the forks and
+  their public Actions logs.
 - Read-only rests on review of one small file, not on the credential.
 - Azure tools can't run locally, since students never hold the credential; real
   verification waits for a deploy.
