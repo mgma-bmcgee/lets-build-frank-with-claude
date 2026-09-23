@@ -115,6 +115,8 @@ decide whether to commit it in this PR.)
     are set**. Container Apps injects them; derive this in `config.ts` as
     `allowedHosts`. It is never a required config value, because it is absent in
     tests, CI, Docker build and `npm run dev`.
+  - Also allow `CONTAINER_APP_HOSTNAME` (this revision's own address, `<app>--<rev>.<suffix>`)
+    when set. It was missed in review and found after the first deploy, where it got 403 (fix PR #2).
   - Do **not** use the transport's `enableDnsRebindingProtection`/`allowedHosts`: it
     compares the exact `host:port` string, so `localhost:3000` and `127.0.0.1:3000`
     would both have to be listed.
