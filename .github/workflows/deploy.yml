@@ -117,6 +117,12 @@ jobs:
     # No `needs:` — the build jobs are skipped on main by design, and a job
     # that needs a skipped job is itself skipped. The gate moved into the
     # Dockerfile, which runs `npm test` in both build stages.
+    # One deploy at a time per app. Two merges in quick succession otherwise
+    # race, and the second fails with ContainerAppOperationInProgress. Queue,
+    # don't cancel: the newest commit still deploys last.
+    concurrency:
+      group: deploy-frank-${{ github.repository_owner }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
