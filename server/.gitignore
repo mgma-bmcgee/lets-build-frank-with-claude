@@ -1,0 +1,2 @@
+# The console build lands here only inside the image (Dockerfile: ui/dist -> /app/public).
+public/
